@@ -27,6 +27,12 @@
       ],
       "@spartan-ng/helm/separator": [
         "./libs/ui/separator/src/index.ts"
+      ],
+      "@spartan-ng/helm/input": [
+        "./libs/ui/input/src/index.ts"
+      ],
+      "@spartan-ng/helm/button": [
+        "./libs/ui/button/src/index.ts"
       ]
     }
   },
