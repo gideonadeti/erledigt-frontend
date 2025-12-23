@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { HlmCardImports } from '@spartan-ng/helm/card';
+import { HlmEmptyImports } from '@spartan-ng/helm/empty';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideCheckSquare } from '@ng-icons/lucide';
 
 import { TasksService } from './tasks.service';
 import type { Task } from './task.model';
@@ -9,9 +13,11 @@ import { TaskCardComponent } from './task-card.component';
 @Component({
   selector: 'app-tasks',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HlmCardImports, TaskCardComponent],
+  imports: [HlmCardImports, TaskCardComponent, HlmEmptyImports, HlmButtonImports, NgIcon],
+  providers: [provideIcons({ lucideCheckSquare })],
   template: `
     <section class="space-y-6">
+      @if (tasks.isPending() || tasks.isError() || (tasks.data() ?? []).length > 0) {
       <div>
         <div>
           <h1 class="text-3xl font-bold">Tasks</h1>
@@ -20,8 +26,7 @@ import { TaskCardComponent } from './task-card.component';
           </p>
         </div>
       </div>
-
-      @if (tasks.isPending()) {
+      } @if (tasks.isPending()) {
       <div class="space-y-4">
         <p class="text-sm text-muted-foreground">Loading your tasks...</p>
       </div>
@@ -43,13 +48,19 @@ import { TaskCardComponent } from './task-card.component';
         }
       </div>
       } @else {
-      <div
-        class="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border px-6 py-10 text-center"
-      >
-        <p class="text-sm font-medium text-foreground">No tasks yet</p>
-        <p class="text-sm text-muted-foreground">
-          Once you add tasks, they’ll show up here so you can keep track of what’s next.
-        </p>
+      <div hlmEmpty>
+        <div hlmEmptyHeader>
+          <div hlmEmptyMedia variant="icon">
+            <ng-icon name="lucideCheckSquare" />
+          </div>
+          <div hlmEmptyTitle>No Tasks Yet</div>
+          <div hlmEmptyDescription>
+            You haven&apos;t created any tasks yet. Get started by creating your first task.
+          </div>
+        </div>
+        <div hlmEmptyContent>
+          <button hlmBtn>Create Task</button>
+        </div>
       </div>
       } } }
     </section>
