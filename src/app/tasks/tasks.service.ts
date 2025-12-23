@@ -19,4 +19,16 @@ export class TasksService {
       })
     );
   }
+
+  toggleTaskCompletion(id: number, isCompleted: boolean) {
+    return firstValueFrom(
+      this.http.patch<Task>(
+        `${API_BASE}/api/TodoTasks/${id}/completion`,
+        { isCompleted },
+        {
+          withCredentials: true,
+        }
+      )
+    );
+  }
 }

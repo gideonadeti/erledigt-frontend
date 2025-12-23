@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { injectQuery } from '@tanstack/angular-query-experimental';
+import {
+  injectMutation,
+  injectQuery,
+  injectQueryClient,
+} from '@tanstack/angular-query-experimental';
 import { format, isPast, isToday, isTomorrow, isYesterday } from 'date-fns';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -47,15 +51,27 @@ import type { Task } from './task.model';
           </p>
         </div>
         } @else {
-        <div>
-          <h1 class="text-3xl font-bold" [class.line-through]="task()?.isCompleted">
-            {{ task()?.title }}
-          </h1>
-          <p class="text-muted-foreground mt-2">
-            <span hlmBadge [class]="priorityBadgeClass(task()!)">
-              {{ priorityLabel(task()!) }}
-            </span>
-          </p>
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <h1 class="text-3xl font-bold" [class.line-through]="task()?.isCompleted">
+              {{ task()?.title }}
+            </h1>
+            <p class="text-muted-foreground mt-2">
+              <span hlmBadge [class]="priorityBadgeClass(task()!)">
+                {{ priorityLabel(task()!) }}
+              </span>
+            </p>
+          </div>
+          @if (task(); as currentTask) {
+          <button
+            hlmBtn
+            [variant]="currentTask.isCompleted ? 'outline' : 'default'"
+            (click)="onToggleCompletion()"
+            [disabled]="toggleCompletionMutation.isPending()"
+          >
+            {{ currentTask.isCompleted ? 'Mark as Pending' : 'Mark as Complete' }}
+          </button>
+          }
         </div>
         } } @if (taskQuery.isPending()) {
         <section hlmCard class="mt-6">
@@ -103,6 +119,7 @@ import type { Task } from './task.model';
 export class TaskComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly tasksService = inject(TasksService);
+  private readonly queryClient = injectQueryClient();
 
   readonly taskQuery = injectQuery<Task[]>(() => ({
     queryKey: ['tasks'],
@@ -111,6 +128,7 @@ export class TaskComponent {
 
   readonly taskId = computed(() => {
     const id = this.route.snapshot.paramMap.get('id');
+
     return id ? Number.parseInt(id, 10) : null;
   });
 
@@ -122,6 +140,61 @@ export class TaskComponent {
     }
     return tasks.find((t) => t.id === id) ?? null;
   });
+
+  readonly toggleCompletionMutation = injectMutation(() => ({
+    mutationFn: (isCompleted: boolean) => {
+      const id = this.taskId();
+
+      if (!id) {
+        throw new Error('Task ID not found');
+      }
+
+      return this.tasksService.toggleTaskCompletion(id, isCompleted);
+    },
+    onMutate: async (isCompleted, context) => {
+      const id = this.taskId();
+
+      if (!id) return;
+
+      // Cancel any outgoing refetches
+      await context.client.cancelQueries({ queryKey: ['tasks'] });
+
+      // Snapshot the previous value
+      const previousTasks = context.client.getQueryData<Task[]>(['tasks']);
+
+      // Optimistically update to the new value
+      context.client.setQueryData<Task[]>(['tasks'], (old) => {
+        if (!old) return old;
+
+        return old.map((task) => (task.id === id ? { ...task, isCompleted } : task));
+      });
+
+      // Return a result object with the snapshotted value
+      return { previousTasks };
+    },
+    // If the mutation fails, use the result returned from onMutate to roll back
+    onError: (_, __, onMutateResult, context) => {
+      if (onMutateResult?.previousTasks) {
+        context.client.setQueryData(['tasks'], onMutateResult.previousTasks);
+      }
+    },
+    // Always refetch after error or success
+    onSettled: () => {
+      this.queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  }));
+
+  onToggleCompletion(): void {
+    const currentTask = this.task();
+
+    if (!currentTask) {
+      return;
+    }
+
+    const newStatus = !currentTask.isCompleted;
+
+    this.toggleCompletionMutation.mutate(newStatus);
+  }
 
   formatDueDateDisplay(task: Task): string {
     if (!task.dueDate) {

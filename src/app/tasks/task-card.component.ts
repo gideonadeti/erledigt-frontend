@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
+import { injectMutation, injectQueryClient } from '@tanstack/angular-query-experimental';
 import { format, isPast, isToday, isTomorrow, isYesterday } from 'date-fns';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -10,6 +11,7 @@ import { lucideMoreHorizontal } from '@ng-icons/lucide';
 import { HlmIcon } from '@spartan-ng/helm/icon';
 
 import type { Task } from './task.model';
+import { TasksService } from './tasks.service';
 
 @Component({
   selector: 'app-task-card',
@@ -69,9 +71,29 @@ import type { Task } from './task.model';
           <button hlmDropdownMenuItem (click)="onViewTask()">View</button>
           <hlm-dropdown-menu-separator />
           @if (!task().isCompleted) {
-          <button hlmDropdownMenuItem>Mark as Complete</button>
+          <button
+            hlmDropdownMenuItem
+            (click)="onToggleCompletion()"
+            [disabled]="toggleCompletionMutation.isPending()"
+          >
+            @if (toggleCompletionMutation.isPending()) {
+            Marking as Complete...
+            } @else {
+            Mark as Complete
+            }
+          </button>
           } @else {
-          <button hlmDropdownMenuItem>Mark as Pending</button>
+          <button
+            hlmDropdownMenuItem
+            (click)="onToggleCompletion()"
+            [disabled]="toggleCompletionMutation.isPending()"
+          >
+            @if (toggleCompletionMutation.isPending()) {
+            Marking as Pending...
+            } @else {
+            Mark as Pending
+            }
+          </button>
           }
           <button hlmDropdownMenuItem>Edit</button>
           <hlm-dropdown-menu-separator />
@@ -83,11 +105,51 @@ import type { Task } from './task.model';
 })
 export class TaskCardComponent {
   private readonly router = inject(Router);
+  private readonly tasksService = inject(TasksService);
+  private readonly queryClient = injectQueryClient();
 
   readonly task = input.required<Task>();
 
+  readonly toggleCompletionMutation = injectMutation(() => ({
+    mutationFn: (isCompleted: boolean) =>
+      this.tasksService.toggleTaskCompletion(this.task().id, isCompleted),
+    onMutate: async (isCompleted, context) => {
+      // Cancel any outgoing refetches
+      await context.client.cancelQueries({ queryKey: ['tasks'] });
+
+      // Snapshot the previous value
+      const previousTasks = context.client.getQueryData<Task[]>(['tasks']);
+
+      // Optimistically update to the new value
+      context.client.setQueryData<Task[]>(['tasks'], (old) => {
+        if (!old) return old;
+        return old.map((task) =>
+          task.id === this.task().id ? { ...task, isCompleted } : task
+        );
+      });
+
+      // Return a result object with the snapshotted value
+      return { previousTasks };
+    },
+    // If the mutation fails, use the result returned from onMutate to roll back
+    onError: (err, isCompleted, onMutateResult, context) => {
+      if (onMutateResult?.previousTasks) {
+        context.client.setQueryData(['tasks'], onMutateResult.previousTasks);
+      }
+    },
+    // Always refetch after error or success:
+    onSettled: () => {
+      this.queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  }));
+
   onViewTask(): void {
     this.router.navigate(['/tasks', this.task().id]);
+  }
+
+  onToggleCompletion(): void {
+    const newStatus = !this.task().isCompleted;
+    this.toggleCompletionMutation.mutate(newStatus);
   }
 
   formatDueDateDisplay(task: Task): string {
