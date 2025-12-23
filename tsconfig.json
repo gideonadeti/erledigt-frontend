@@ -33,6 +33,9 @@
       ],
       "@spartan-ng/helm/button": [
         "./libs/ui/button/src/index.ts"
+      ],
+      "@spartan-ng/helm/spinner": [
+        "./libs/ui/spinner/src/index.ts"
       ]
     }
   },
