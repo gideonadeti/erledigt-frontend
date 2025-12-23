@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 
@@ -10,7 +9,7 @@ import { TaskCardComponent } from './task-card.component';
 @Component({
   selector: 'app-tasks',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HlmCardImports, DatePipe, TaskCardComponent],
+  imports: [HlmCardImports, TaskCardComponent],
   template: `
     <section class="space-y-6">
       <div>
