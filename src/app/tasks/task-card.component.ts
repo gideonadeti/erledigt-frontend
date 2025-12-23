@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { format, isToday, isTomorrow, isYesterday } from 'date-fns';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 
@@ -8,7 +8,7 @@ import type { Task } from './task.model';
 @Component({
   selector: 'app-task-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HlmCardImports, HlmBadgeImports, DatePipe],
+  imports: [HlmCardImports, HlmBadgeImports],
   template: `
     <section hlmCard class="flex flex-col justify-between">
       <div hlmCardHeader class="flex items-start justify-between gap-2">
@@ -31,7 +31,7 @@ import type { Task } from './task.model';
         <div class="flex items-center gap-1 text-muted-foreground">
           <span class="font-medium">Due:</span>
           <span>
-            {{ task().dueDate ? (task().dueDate | date : 'mediumDate') : 'No due date' }}
+            {{ task().dueDate ? formatDueDate(task().dueDate) : 'No due date' }}
           </span>
         </div>
 
@@ -44,6 +44,24 @@ import type { Task } from './task.model';
 })
 export class TaskCardComponent {
   readonly task = input.required<Task>();
+
+  formatDueDate(dueDate: string): string {
+    const date = new Date(dueDate);
+
+    if (isToday(date)) {
+      return format(date, 'h:mm a');
+    }
+
+    if (isTomorrow(date)) {
+      return `Tomorrow at ${format(date, 'h:mm a')}`;
+    }
+
+    if (isYesterday(date)) {
+      return `Yesterday at ${format(date, 'h:mm a')}`;
+    }
+
+    return `${format(date, 'MMM d, yyyy')} at ${format(date, 'h:mm a')}`;
+  }
 
   priorityLabel(task: Task): string {
     switch (task.priority) {
