@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Router } from '@angular/router';
 import { format, isPast, isToday, isTomorrow, isYesterday } from 'date-fns';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -28,7 +29,7 @@ import type { Task } from './task.model';
         <div class="flex-1">
           <h2
             hlmCardTitle
-            class="text-base font-semibold text-foreground line-clamp-2"
+            class="text-base font-semibold text-foreground line-clamp-1"
             [class.line-through]="task().isCompleted"
           >
             {{ task().title }}
@@ -65,7 +66,7 @@ import type { Task } from './task.model';
     <ng-template #menu>
       <hlm-dropdown-menu>
         <hlm-dropdown-menu-group>
-          <button hlmDropdownMenuItem>View</button>
+          <button hlmDropdownMenuItem (click)="onViewTask()">View</button>
           <hlm-dropdown-menu-separator />
           @if (!task().isCompleted) {
           <button hlmDropdownMenuItem>Mark as Complete</button>
@@ -81,7 +82,13 @@ import type { Task } from './task.model';
   `,
 })
 export class TaskCardComponent {
+  private readonly router = inject(Router);
+
   readonly task = input.required<Task>();
+
+  onViewTask(): void {
+    this.router.navigate(['/tasks', this.task().id]);
+  }
 
   formatDueDateDisplay(task: Task): string {
     if (!task.dueDate) {
