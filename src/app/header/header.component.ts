@@ -32,8 +32,7 @@ import { AuthService, ManageInfoResponse } from '../auth/auth.service';
 
         <div class="flex items-center gap-3">
           @if (isLoading()) {
-          <div class="flex items-center gap-2">
-            <div class="size-8 animate-pulse rounded-full bg-muted"></div>
+          <div class="flex items-center">
             <span class="hidden text-sm text-muted-foreground sm:inline-block">Loading...</span>
           </div>
           } @else { @if (user(); as currentUser) {
