@@ -48,6 +48,6 @@ export class SignInComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   protected onSuccess() {
-    this.router.navigateByUrl('/');
+    this.router.navigateByUrl('/tasks');
   }
 }
