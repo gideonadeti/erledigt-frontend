@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs';
+import { finalize, filter } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideLogOut } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -74,12 +74,15 @@ export class HeaderComponent {
   protected readonly user = signal<ManageInfoResponse | null>(null);
 
   constructor() {
-    this.authService
-      .fetchCurrentUser()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((currentUser) => {
-        this.user.set(currentUser ?? null);
-        this.isLoading.set(false);
+    this.loadCurrentUser();
+
+    this.router.events
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter((event) => event instanceof NavigationEnd)
+      )
+      .subscribe(() => {
+        this.loadCurrentUser();
       });
   }
 
@@ -98,6 +101,18 @@ export class HeaderComponent {
       .subscribe(() => {
         this.user.set(null);
         this.router.navigateByUrl('/auth/sign-in');
+      });
+  }
+
+  private loadCurrentUser(): void {
+    this.isLoading.set(true);
+
+    this.authService
+      .fetchCurrentUser()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((currentUser) => {
+        this.user.set(currentUser ?? null);
+        this.isLoading.set(false);
       });
   }
 }
