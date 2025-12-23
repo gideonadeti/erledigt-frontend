@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { format, isToday, isTomorrow, isYesterday } from 'date-fns';
+import { format, isPast, isToday, isTomorrow, isYesterday } from 'date-fns';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 
@@ -28,9 +28,9 @@ import type { Task } from './task.model';
       </p>
 
       <div hlmCardFooter class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div class="flex items-center gap-1 text-muted-foreground">
-          <span class="font-medium">Due:</span>
-          <span>
+        <div class="flex items-center gap-1">
+          <span class="font-medium text-muted-foreground">Due:</span>
+          <span [class]="dueDateClass(task())">
             {{ task().dueDate ? formatDueDate(task().dueDate) : 'No due date' }}
           </span>
         </div>
@@ -61,6 +61,24 @@ export class TaskCardComponent {
     }
 
     return `${format(date, 'MMM d, yyyy')} at ${format(date, 'h:mm a')}`;
+  }
+
+  dueDateClass(task: Task): string {
+    if (!task.dueDate || task.isCompleted) {
+      return 'text-muted-foreground';
+    }
+
+    const date = new Date(task.dueDate);
+
+    if (isPast(date) && !isToday(date)) {
+      return 'text-destructive font-medium';
+    }
+
+    if (isToday(date)) {
+      return 'text-amber-600 font-medium';
+    }
+
+    return 'text-muted-foreground';
   }
 
   priorityLabel(task: Task): string {
