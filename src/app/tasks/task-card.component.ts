@@ -23,7 +23,7 @@ import type { Task } from './task.model';
         </span>
       </div>
 
-      <p hlmCardContent class="text-sm text-muted-foreground line-clamp-3">
+      <p hlmCardContent class="text-sm text-muted-foreground line-clamp-2">
         {{ task().description || 'No description provided.' }}
       </p>
 
