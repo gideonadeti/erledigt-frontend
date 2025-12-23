@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { HlmCardImports } from '@spartan-ng/helm/card';
@@ -12,23 +12,14 @@ import type { Task } from './task.model';
   imports: [HlmCardImports, DatePipe],
   template: `
     <section class="space-y-6">
-      <header class="mb-6 flex items-center justify-between gap-2">
+      <div>
         <div>
-          <h1 class="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Tasks</h1>
-          <p class="mt-1 text-sm text-muted-foreground">
-            View and manage your tasks for today and beyond.
+          <h1 class="text-3xl font-bold">Tasks</h1>
+          <p class="text-muted-foreground">
+            {{ taskCount() }} task{{ taskCount() !== 1 ? 's' : '' }} available
           </p>
         </div>
-
-        <button
-          type="button"
-          class="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
-          (click)="refetch()"
-          [disabled]="tasks.isFetching()"
-        >
-          <span> @if (!tasks.isFetching()) { Refresh } @else { Refreshing... } </span>
-        </button>
-      </header>
+      </div>
 
       @if (tasks.isPending()) {
       <div class="space-y-4">
@@ -106,6 +97,8 @@ export class TasksComponent {
     queryKey: ['tasks'],
     queryFn: () => this.tasksService.getTasks(),
   }));
+
+  readonly taskCount = computed(() => (this.tasks.data() ?? []).length);
 
   refetch(): void {
     this.tasks.refetch();
