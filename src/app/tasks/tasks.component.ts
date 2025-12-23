@@ -11,7 +11,7 @@ import type { Task } from './task.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HlmCardImports, DatePipe],
   template: `
-    <section class="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <section class="space-y-6">
       <header class="mb-6 flex items-center justify-between gap-2">
         <div>
           <h1 class="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Tasks</h1>
