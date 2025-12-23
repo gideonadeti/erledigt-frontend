@@ -5,7 +5,7 @@ import { catchError, of } from 'rxjs';
 type LoginRequest = { email: string; password: string };
 type RegisterRequest = { email: string; password: string };
 
-type ManageInfoResponse = {
+export type ManageInfoResponse = {
   email: string;
   isEmailConfirmed: boolean;
 };
