@@ -21,7 +21,7 @@ import type { Task } from './task.model';
           class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
           [class]="priorityBadgeClass(task())"
         >
-          {{ task().priority }}
+          {{ priorityLabel(task()) }}
         </span>
       </div>
 
@@ -50,13 +50,25 @@ import type { Task } from './task.model';
 export class TaskCardComponent {
   readonly task = input.required<Task>();
 
+  priorityLabel(task: Task): string {
+    switch (task.priority) {
+      case 3:
+        return 'High';
+      case 2:
+        return 'Medium';
+      case 1:
+      default:
+        return 'Low';
+    }
+  }
+
   priorityBadgeClass(task: Task): string {
     switch (task.priority) {
-      case 'High':
+      case 3:
         return 'bg-destructive/10 text-destructive border border-destructive/30';
-      case 'Medium':
+      case 2:
         return 'bg-amber-500/10 text-amber-700 border border-amber-500/30';
-      case 'Low':
+      case 1:
       default:
         return 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/30';
     }
