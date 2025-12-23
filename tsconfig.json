@@ -45,6 +45,9 @@
       ],
       "@spartan-ng/helm/empty": [
         "./libs/ui/empty/src/index.ts"
+      ],
+      "@spartan-ng/helm/skeleton": [
+        "./libs/ui/skeleton/src/index.ts"
       ]
     }
   },
