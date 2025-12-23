@@ -48,6 +48,9 @@
       ],
       "@spartan-ng/helm/skeleton": [
         "./libs/ui/skeleton/src/index.ts"
+      ],
+      "@spartan-ng/helm/dropdown-menu": [
+        "./libs/ui/dropdown-menu/src/index.ts"
       ]
     }
   },
