@@ -39,6 +39,9 @@
       ],
       "@spartan-ng/helm/icon": [
         "./libs/ui/icon/src/index.ts"
+      ],
+      "@spartan-ng/helm/badge": [
+        "./libs/ui/badge/src/index.ts"
       ]
     }
   },
