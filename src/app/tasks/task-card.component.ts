@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HlmCardImports } from '@spartan-ng/helm/card';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 
 import type { Task } from './task.model';
 
 @Component({
   selector: 'app-task-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HlmCardImports, DatePipe],
+  imports: [HlmCardImports, HlmBadgeImports, DatePipe],
   template: `
     <section hlmCard class="flex flex-col justify-between">
       <div hlmCardHeader class="flex items-start justify-between gap-2">
@@ -17,10 +18,7 @@ import type { Task } from './task.model';
           </h2>
         </div>
 
-        <span
-          class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-          [class]="priorityBadgeClass(task())"
-        >
+        <span hlmBadge [class]="priorityBadgeClass(task())">
           {{ priorityLabel(task()) }}
         </span>
       </div>
@@ -37,10 +35,7 @@ import type { Task } from './task.model';
           </span>
         </div>
 
-        <span
-          class="inline-flex items-center rounded-full px-2 py-0.5 font-medium"
-          [class]="statusBadgeClass(task())"
-        >
+        <span hlmBadge [class]="statusBadgeClass(task())">
           {{ task().isCompleted ? 'Completed' : 'Pending' }}
         </span>
       </div>
