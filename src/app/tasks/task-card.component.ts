@@ -28,10 +28,10 @@ import type { Task } from './task.model';
       </p>
 
       <div hlmCardFooter class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div class="flex items-center gap-1">
-          <span class="font-medium text-muted-foreground">Due:</span>
+        <div class="flex items-center gap-1 text-muted-foreground">
+          <span class="font-medium">Due:</span>
           <span [class]="dueDateClass(task())">
-            {{ task().dueDate ? formatDueDate(task().dueDate) : 'No due date' }}
+            {{ formatDueDateDisplay(task()) }}
           </span>
         </div>
 
@@ -44,6 +44,13 @@ import type { Task } from './task.model';
 })
 export class TaskCardComponent {
   readonly task = input.required<Task>();
+
+  formatDueDateDisplay(task: Task): string {
+    if (!task.dueDate) {
+      return 'No due date';
+    }
+    return this.formatDueDate(task.dueDate);
+  }
 
   formatDueDate(dueDate: string): string {
     const date = new Date(dueDate);
