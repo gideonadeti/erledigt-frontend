@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import type { Task } from './task.model';
 
-const API_BASE = 'http://erledigt-api.runasp.net/api/TodoTasks';
+const API_BASE = 'http://localhost:5211/api/TodoTasks';
 
 @Injectable({
   providedIn: 'root',
