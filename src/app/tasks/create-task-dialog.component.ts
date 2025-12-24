@@ -103,7 +103,7 @@ import { DialogFooterComponent } from './dialog-footer.component';
                 }
               </div>
 
-              <div class="flex gap-4">
+              <div class="flex flex-col sm:flex-row gap-4">
                 <div class="flex flex-col gap-2 flex-1">
                   <label for="date-picker" hlmLabel class="px-1">Due Date</label>
                   <div class="flex items-center gap-2">
@@ -114,7 +114,7 @@ import { DialogFooterComponent } from './dialog-footer.component';
                       formControlName="dueDate"
                       [autoCloseOnSelect]="true"
                       captionLayout="dropdown"
-                      class="flex-1"
+                      class="flex-1 min-w-0"
                     >
                       <span>Select date</span>
                     </hlm-date-picker>
@@ -122,7 +122,7 @@ import { DialogFooterComponent } from './dialog-footer.component';
                     <button
                       type="button"
                       (click)="clearDueDate()"
-                      class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                      class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                       aria-label="Clear date"
                     >
                       <ng-icon hlm size="sm" name="lucideX" />
@@ -131,7 +131,7 @@ import { DialogFooterComponent } from './dialog-footer.component';
                   </div>
                 </div>
 
-                <hlm-form-field class="flex-1">
+                <hlm-form-field class="flex-1 min-w-0">
                   <label hlmLabel>Time</label>
                   <input
                     hlmInput
