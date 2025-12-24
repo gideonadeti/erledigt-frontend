@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   input,
   output,
@@ -26,7 +27,7 @@ import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { HlmDatePickerImports } from '@spartan-ng/helm/date-picker';
 
 import { TasksService } from './tasks.service';
-import type { TaskPriority } from './task.model';
+import type { Task, TaskPriority } from './task.model';
 import { DialogFooterComponent } from './dialog-footer.component';
 
 @Component({
@@ -51,11 +52,15 @@ import { DialogFooterComponent } from './dialog-footer.component';
   ],
   template: `
     <hlm-dialog [state]="dialogState()" (closed)="onClosed()">
-      <hlm-dialog-content *brnDialogContent="let ctx" class="sm:max-w-[600px]">
+      <hlm-dialog-content *brnDialogContent="let ctx" class="w-full max-w-[600px] sm:w-[600px]">
         <hlm-dialog-header>
-          <h3 hlmDialogTitle>Add New Task</h3>
+          <h3 hlmDialogTitle>{{ isEditMode() ? 'Edit Task' : 'Add New Task' }}</h3>
           <p hlmDialogDescription>
-            Fill in the details below to add a new task. All fields marked with * are required.
+            {{
+              isEditMode()
+                ? 'Update the task details below. All fields marked with * are required.'
+                : 'Fill in the details below to add a new task. All fields marked with * are required.'
+            }}
           </p>
         </hlm-dialog-header>
 
@@ -142,10 +147,10 @@ import { DialogFooterComponent } from './dialog-footer.component';
         </form>
 
         <app-dialog-footer
-          [isPending]="createTaskMutation.isPending()"
+          [isPending]="taskMutation.isPending()"
           [disabled]="!form.dirty"
-          [text]="'Add Task'"
-          [pendingText]="'Adding...'"
+          [text]="isEditMode() ? 'Update Task' : 'Add Task'"
+          [pendingText]="isEditMode() ? 'Updating...' : 'Adding...'"
           [handleCancel]="closeDialog"
           [handleSubmit]="onSubmit"
         />
@@ -160,6 +165,7 @@ export class CreateTaskDialogComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly open = input(false);
+  readonly task = input<Task | null>(null);
   readonly openChange = output<boolean>();
   readonly success = output<void>();
 
@@ -167,6 +173,7 @@ export class CreateTaskDialogComponent {
   readonly maxDate = new Date(2050, 11, 31);
 
   readonly dialogState = computed<'open' | 'closed'>(() => (this.open() ? 'open' : 'closed'));
+  readonly isEditMode = computed(() => this.task() !== null);
 
   readonly form = this.fb.group({
     title: ['', [Validators.required]],
@@ -176,13 +183,29 @@ export class CreateTaskDialogComponent {
     dueDate: [null as Date | null],
   });
 
-  readonly createTaskMutation = injectMutation(() => ({
+  readonly taskMutation = injectMutation(() => ({
     mutationFn: (data: {
+      id?: number;
       title: string;
       description?: string | null;
       priority: TaskPriority;
       dueDate?: string | null;
-    }) => this.tasksService.createTask(data),
+    }) => {
+      if (data.id) {
+        return this.tasksService.updateTask(data.id, {
+          title: data.title,
+          description: data.description,
+          priority: data.priority,
+          dueDate: data.dueDate,
+        });
+      }
+      return this.tasksService.createTask({
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        dueDate: data.dueDate,
+      });
+    },
     onSuccess: () => {
       this.queryClient.invalidateQueries({ queryKey: ['tasks'] });
       this.resetForm();
@@ -208,6 +231,19 @@ export class CreateTaskDialogComponent {
           this.form.controls.time.setValue(`${hours}:${minutes}`, { emitEvent: false });
         }
       });
+
+    // Populate form when task input changes (for edit mode)
+    effect(() => {
+      const task = this.task();
+      const isOpen = this.open();
+      if (isOpen && task) {
+        // Populate form when dialog opens with a task (edit mode)
+        this.populateForm(task);
+      } else if (isOpen && !task) {
+        // Reset form when dialog opens without a task (create mode)
+        this.resetForm();
+      }
+    });
   }
 
   clearDueDate() {
@@ -223,6 +259,27 @@ export class CreateTaskDialogComponent {
   closeDialog = () => {
     this.openChange.emit(false);
   };
+
+  populateForm(task: Task) {
+    let dueDate: Date | null = null;
+    let time = '';
+
+    if (task.dueDate) {
+      const date = new Date(task.dueDate);
+      dueDate = date;
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      time = `${hours}:${minutes}`;
+    }
+
+    this.form.reset({
+      title: task.title,
+      description: task.description || '',
+      priority: task.priority,
+      dueDate,
+      time,
+    });
+  }
 
   resetForm() {
     this.form.reset({
@@ -254,7 +311,9 @@ export class CreateTaskDialogComponent {
     }
 
     // Form is validated, so title and priority are guaranteed to have values
-    this.createTaskMutation.mutate({
+    const task = this.task();
+    this.taskMutation.mutate({
+      id: task?.id,
       title: formValue.title!,
       description: formValue.description || null,
       priority: formValue.priority!,
