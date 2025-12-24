@@ -9,6 +9,7 @@ import {
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmFormFieldImports } from '@spartan-ng/helm/form-field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideEye, lucideEyeOff } from '@ng-icons/lucide';
 import { HlmIcon } from '@spartan-ng/helm/icon';
@@ -25,6 +26,7 @@ type SubmitFn = (payload: { email: string; password: string }) => any;
     HlmFieldImports,
     HlmFormFieldImports,
     HlmInputImports,
+    HlmLabelImports,
     SubmitButtonComponent,
     NgIcon,
     HlmIcon,
