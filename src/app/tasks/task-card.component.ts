@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
-import { injectMutation, injectQueryClient } from '@tanstack/angular-query-experimental';
+import { injectMutation, QueryClient } from '@tanstack/angular-query-experimental';
 import { format, isPast, isToday, isTomorrow, isYesterday } from 'date-fns';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -76,11 +76,8 @@ import { TasksService } from './tasks.service';
             (click)="onToggleCompletion()"
             [disabled]="toggleCompletionMutation.isPending()"
           >
-            @if (toggleCompletionMutation.isPending()) {
-            Marking as Complete...
-            } @else {
-            Mark as Complete
-            }
+            @if (toggleCompletionMutation.isPending()) { Marking as Complete... } @else { Mark as
+            Complete }
           </button>
           } @else {
           <button
@@ -88,14 +85,11 @@ import { TasksService } from './tasks.service';
             (click)="onToggleCompletion()"
             [disabled]="toggleCompletionMutation.isPending()"
           >
-            @if (toggleCompletionMutation.isPending()) {
-            Marking as Pending...
-            } @else {
-            Mark as Pending
-            }
+            @if (toggleCompletionMutation.isPending()) { Marking as Pending... } @else { Mark as
+            Pending }
           </button>
           }
-          <button hlmDropdownMenuItem>Edit</button>
+          <button hlmDropdownMenuItem (click)="onEditTask()">Edit</button>
           <hlm-dropdown-menu-separator />
           <button hlmDropdownMenuItem variant="destructive">Delete</button>
         </hlm-dropdown-menu-group>
@@ -106,9 +100,10 @@ import { TasksService } from './tasks.service';
 export class TaskCardComponent {
   private readonly router = inject(Router);
   private readonly tasksService = inject(TasksService);
-  private readonly queryClient = injectQueryClient();
+  private readonly queryClient = inject(QueryClient);
 
   readonly task = input.required<Task>();
+  readonly editTask = output<Task>();
 
   readonly toggleCompletionMutation = injectMutation(() => ({
     mutationFn: (isCompleted: boolean) =>
@@ -123,9 +118,7 @@ export class TaskCardComponent {
       // Optimistically update to the new value
       context.client.setQueryData<Task[]>(['tasks'], (old) => {
         if (!old) return old;
-        return old.map((task) =>
-          task.id === this.task().id ? { ...task, isCompleted } : task
-        );
+        return old.map((task) => (task.id === this.task().id ? { ...task, isCompleted } : task));
       });
 
       // Return a result object with the snapshotted value
@@ -143,13 +136,17 @@ export class TaskCardComponent {
     },
   }));
 
-  onViewTask(): void {
+  onViewTask() {
     this.router.navigate(['/tasks', this.task().id]);
   }
 
-  onToggleCompletion(): void {
+  onToggleCompletion() {
     const newStatus = !this.task().isCompleted;
     this.toggleCompletionMutation.mutate(newStatus);
+  }
+
+  onEditTask() {
+    this.editTask.emit(this.task());
   }
 
   formatDueDateDisplay(task: Task): string {
