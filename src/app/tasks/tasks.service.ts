@@ -31,4 +31,17 @@ export class TasksService {
       )
     );
   }
+
+  createTask(data: {
+    title: string;
+    description?: string | null;
+    priority: 1 | 2 | 3;
+    dueDate?: string | null;
+  }) {
+    return firstValueFrom(
+      this.http.post<Task>(`${API_BASE}/api/TodoTasks`, data, {
+        withCredentials: true,
+      })
+    );
+  }
 }
