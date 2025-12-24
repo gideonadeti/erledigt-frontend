@@ -12,6 +12,7 @@ import { TasksService } from './tasks.service';
 import type { Task } from './task.model';
 import { TaskCardComponent } from './task-card.component';
 import { CreateTaskDialogComponent } from './create-task-dialog.component';
+import { DeleteTaskConfirmationDialogComponent } from './delete-task-confirmation-dialog.component';
 
 @Component({
   selector: 'app-tasks',
@@ -23,6 +24,7 @@ import { CreateTaskDialogComponent } from './create-task-dialog.component';
     HlmButtonImports,
     HlmSkeletonImports,
     CreateTaskDialogComponent,
+    DeleteTaskConfirmationDialogComponent,
     NgIcon,
     HlmIcon,
   ],
@@ -85,7 +87,11 @@ import { CreateTaskDialogComponent } from './create-task-dialog.component';
       } @else { @if ((tasks.data() ?? []).length > 0) {
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @for (task of tasks.data() ?? []; track task.id) {
-        <app-task-card [task]="task" (editTask)="onEditTask($event)" />
+        <app-task-card
+          [task]="task"
+          (editTask)="onEditTask($event)"
+          (deleteTask)="onDeleteTask($event)"
+        />
         }
       </div>
       } @else {
@@ -111,6 +117,12 @@ import { CreateTaskDialogComponent } from './create-task-dialog.component';
       [task]="editingTask()"
       (openChange)="onDialogOpenChange($event)"
     />
+
+    <app-delete-task-confirmation-dialog
+      [open]="deleteDialogOpen()"
+      [task]="deletingTask()"
+      (openChange)="onDeleteDialogOpenChange($event)"
+    />
   `,
 })
 export class TasksComponent {
@@ -118,6 +130,8 @@ export class TasksComponent {
 
   readonly dialogOpen = signal(false);
   readonly editingTask = signal<Task | null>(null);
+  readonly deleteDialogOpen = signal(false);
+  readonly deletingTask = signal<Task | null>(null);
 
   readonly tasks = injectQuery<Task[]>(() => ({
     queryKey: ['tasks'],
@@ -141,6 +155,19 @@ export class TasksComponent {
 
     if (!open) {
       this.editingTask.set(null);
+    }
+  }
+
+  onDeleteTask(task: Task) {
+    this.deletingTask.set(task);
+    this.deleteDialogOpen.set(true);
+  }
+
+  onDeleteDialogOpenChange(open: boolean) {
+    this.deleteDialogOpen.set(open);
+
+    if (!open) {
+      this.deletingTask.set(null);
     }
   }
 
