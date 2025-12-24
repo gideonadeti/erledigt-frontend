@@ -39,9 +39,12 @@ import type { Task } from './task.model';
         </a>
 
         @if (taskQuery.isPending()) {
-        <div class="space-y-4">
-          <hlm-skeleton class="h-9 w-64 mb-2" />
-          <hlm-skeleton class="h-5 w-48" />
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 space-y-4">
+            <hlm-skeleton class="h-9 w-64 mb-2" />
+            <hlm-skeleton class="h-5 w-48" />
+          </div>
+          <hlm-skeleton class="h-10 w-40" />
         </div>
         } @else { @if (taskQuery.isError() || !task()) {
         <div class="space-y-3">

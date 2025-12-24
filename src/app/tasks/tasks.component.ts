@@ -32,11 +32,12 @@ import { DeleteTaskConfirmationDialogComponent } from './delete-task-confirmatio
   template: `
     <section class="space-y-6">
       @if (tasks.isPending()) {
-      <div>
+      <div class="flex items-start justify-between gap-4">
         <div>
           <hlm-skeleton class="h-9 w-32 mb-2" />
           <hlm-skeleton class="h-5 w-48" />
         </div>
+        <hlm-skeleton class="h-10 w-28" />
       </div>
       } @else { @if (tasks.isError() || (tasks.data() ?? []).length > 0) {
       <div class="flex items-start justify-between gap-4">
