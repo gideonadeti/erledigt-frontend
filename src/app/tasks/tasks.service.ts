@@ -44,4 +44,17 @@ export class TasksService {
       })
     );
   }
+
+  updateTask(id: number, data: {
+    title: string;
+    description?: string | null;
+    priority: 1 | 2 | 3;
+    dueDate?: string | null;
+  }) {
+    return firstValueFrom(
+      this.http.put<Task>(`${API_BASE}/api/TodoTasks/${id}`, data, {
+        withCredentials: true,
+      })
+    );
+  }
 }
