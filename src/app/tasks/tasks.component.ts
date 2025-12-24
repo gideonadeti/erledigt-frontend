@@ -1,15 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmEmptyImports } from '@spartan-ng/helm/empty';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideCheckSquare } from '@ng-icons/lucide';
+import { lucideCheckSquare, lucidePlus } from '@ng-icons/lucide';
+import { HlmIcon } from '@spartan-ng/helm/icon';
 
 import { TasksService } from './tasks.service';
 import type { Task } from './task.model';
 import { TaskCardComponent } from './task-card.component';
+import { CreateTaskDialogComponent } from './create-task-dialog.component';
 
 @Component({
   selector: 'app-tasks',
@@ -20,9 +22,11 @@ import { TaskCardComponent } from './task-card.component';
     HlmEmptyImports,
     HlmButtonImports,
     HlmSkeletonImports,
+    CreateTaskDialogComponent,
     NgIcon,
+    HlmIcon,
   ],
-  providers: [provideIcons({ lucideCheckSquare })],
+  providers: [provideIcons({ lucideCheckSquare, lucidePlus })],
   template: `
     <section class="space-y-6">
       @if (tasks.isPending()) {
@@ -33,13 +37,17 @@ import { TaskCardComponent } from './task-card.component';
         </div>
       </div>
       } @else { @if (tasks.isError() || (tasks.data() ?? []).length > 0) {
-      <div>
+      <div class="flex items-start justify-between gap-4">
         <div>
           <h1 class="text-3xl font-bold">Tasks</h1>
           <p class="text-muted-foreground">
             {{ taskCount() }} task{{ taskCount() !== 1 ? 's' : '' }} available
           </p>
         </div>
+        <button hlmBtn (click)="openDialog()">
+          <ng-icon hlm size="sm" name="lucidePlus" />
+          Add Task
+        </button>
       </div>
       } } @if (tasks.isPending()) {
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -88,19 +96,23 @@ import { TaskCardComponent } from './task-card.component';
           </div>
           <div hlmEmptyTitle>No Tasks Yet</div>
           <div hlmEmptyDescription>
-            You haven&apos;t created any tasks yet. Get started by creating your first task.
+            You haven&apos;t added any tasks yet. Get started by adding your first task.
           </div>
         </div>
         <div hlmEmptyContent>
-          <button hlmBtn>Create Task</button>
+          <button hlmBtn (click)="openDialog()">Add Task</button>
         </div>
       </div>
       } } }
     </section>
+
+    <app-create-task-dialog [open]="dialogOpen()" (openChange)="dialogOpen.set($event)" />
   `,
 })
 export class TasksComponent {
   private readonly tasksService = inject(TasksService);
+
+  readonly dialogOpen = signal(false);
 
   readonly tasks = injectQuery<Task[]>(() => ({
     queryKey: ['tasks'],
@@ -109,7 +121,11 @@ export class TasksComponent {
 
   readonly taskCount = computed(() => (this.tasks.data() ?? []).length);
 
-  refetch(): void {
+  openDialog() {
+    this.dialogOpen.set(true);
+  }
+
+  refetch() {
     this.tasks.refetch();
   }
 }
