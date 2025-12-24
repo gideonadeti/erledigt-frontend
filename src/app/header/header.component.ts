@@ -6,6 +6,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideLogOut } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmIcon } from '@spartan-ng/helm/icon';
+import { toast } from 'ngx-sonner';
 
 import { AuthService, ManageInfoResponse } from '../auth/auth.service';
 
@@ -100,6 +101,9 @@ export class HeaderComponent {
       )
       .subscribe(() => {
         this.user.set(null);
+        toast.success('Signed out successfully', {
+          description: 'You have been logged out',
+        });
         this.router.navigateByUrl('/auth/sign-in');
       });
   }

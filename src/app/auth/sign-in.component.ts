@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
+import { toast } from 'ngx-sonner';
 
 import { SubmitButtonComponent } from './submit-button.component';
 import { SignInFormComponent } from './sign-in-form.component';
@@ -48,6 +49,9 @@ export class SignInComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   protected onSuccess() {
+    toast.success('Signed in successfully', {
+      description: 'Welcome back!',
+    });
     this.router.navigateByUrl('/tasks');
   }
 }

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HlmCardImports } from '@spartan-ng/helm/card';
+import { toast } from 'ngx-sonner';
 
 import { SignUpFormComponent } from './sign-up-form.component';
 
@@ -36,6 +37,9 @@ export class SignUpComponent {
   private readonly router = inject(Router);
 
   protected onSuccess() {
+    toast.success('Account created successfully', {
+      description: 'You can now sign in to your account',
+    });
     this.router.navigateByUrl('/auth/sign-in');
   }
 }
