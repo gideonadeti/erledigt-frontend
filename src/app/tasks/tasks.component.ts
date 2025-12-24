@@ -85,7 +85,7 @@ import { CreateTaskDialogComponent } from './create-task-dialog.component';
       } @else { @if ((tasks.data() ?? []).length > 0) {
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @for (task of tasks.data() ?? []; track task.id) {
-        <app-task-card [task]="task" />
+        <app-task-card [task]="task" (editTask)="onEditTask($event)" />
         }
       </div>
       } @else {
@@ -106,13 +106,18 @@ import { CreateTaskDialogComponent } from './create-task-dialog.component';
       } } }
     </section>
 
-    <app-create-task-dialog [open]="dialogOpen()" (openChange)="dialogOpen.set($event)" />
+    <app-create-task-dialog
+      [open]="dialogOpen()"
+      [task]="editingTask()"
+      (openChange)="onDialogOpenChange($event)"
+    />
   `,
 })
 export class TasksComponent {
   private readonly tasksService = inject(TasksService);
 
   readonly dialogOpen = signal(false);
+  readonly editingTask = signal<Task | null>(null);
 
   readonly tasks = injectQuery<Task[]>(() => ({
     queryKey: ['tasks'],
@@ -122,7 +127,21 @@ export class TasksComponent {
   readonly taskCount = computed(() => (this.tasks.data() ?? []).length);
 
   openDialog() {
+    this.editingTask.set(null);
     this.dialogOpen.set(true);
+  }
+
+  onEditTask(task: Task) {
+    this.editingTask.set(task);
+    this.dialogOpen.set(true);
+  }
+
+  onDialogOpenChange(open: boolean) {
+    this.dialogOpen.set(open);
+
+    if (!open) {
+      this.editingTask.set(null);
+    }
   }
 
   refetch() {
