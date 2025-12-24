@@ -10,7 +10,7 @@ export type ManageInfoResponse = {
   isEmailConfirmed: boolean;
 };
 
-const API_BASE = 'http://localhost:5211';
+const API_BASE = 'http://erledigt-api.runasp.net';
 
 @Injectable({
   providedIn: 'root',

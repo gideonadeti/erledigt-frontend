@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import type { Task } from './task.model';
 
-const API_BASE = 'http://localhost:5211';
+const API_BASE = 'http://erledigt-api.runasp.net/api/TodoTasks';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,7 @@ export class TasksService {
 
   getTasks() {
     return firstValueFrom(
-      this.http.get<Task[]>(`${API_BASE}/api/TodoTasks`, {
+      this.http.get<Task[]>(`${API_BASE}`, {
         withCredentials: true,
       })
     );
@@ -23,7 +23,7 @@ export class TasksService {
   toggleTaskCompletion(id: number, isCompleted: boolean) {
     return firstValueFrom(
       this.http.patch<Task>(
-        `${API_BASE}/api/TodoTasks/${id}/completion`,
+        `${API_BASE}/${id}/completion`,
         { isCompleted },
         {
           withCredentials: true,
@@ -39,20 +39,23 @@ export class TasksService {
     dueDate?: string | null;
   }) {
     return firstValueFrom(
-      this.http.post<Task>(`${API_BASE}/api/TodoTasks`, data, {
+      this.http.post<Task>(`${API_BASE}`, data, {
         withCredentials: true,
       })
     );
   }
 
-  updateTask(id: number, data: {
-    title: string;
-    description?: string | null;
-    priority: 1 | 2 | 3;
-    dueDate?: string | null;
-  }) {
+  updateTask(
+    id: number,
+    data: {
+      title: string;
+      description?: string | null;
+      priority: 1 | 2 | 3;
+      dueDate?: string | null;
+    }
+  ) {
     return firstValueFrom(
-      this.http.put<Task>(`${API_BASE}/api/TodoTasks/${id}`, data, {
+      this.http.put<Task>(`${API_BASE}/${id}`, data, {
         withCredentials: true,
       })
     );
@@ -60,7 +63,7 @@ export class TasksService {
 
   deleteTask(id: number) {
     return firstValueFrom(
-      this.http.delete(`${API_BASE}/api/TodoTasks/${id}`, {
+      this.http.delete(`${API_BASE}/${id}`, {
         withCredentials: true,
       })
     );
