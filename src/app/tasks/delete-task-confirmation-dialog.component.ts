@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output } f
 import { injectMutation, QueryClient } from '@tanstack/angular-query-experimental';
 import { BrnDialogImports } from '@spartan-ng/brain/dialog';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
+import { toast } from 'ngx-sonner';
 
 import { TasksService } from './tasks.service';
 import type { Task } from './task.model';
@@ -48,8 +49,12 @@ export class DeleteTaskConfirmationDialogComponent {
   readonly deleteTaskMutation = injectMutation(() => ({
     mutationFn: (id: number) => this.tasksService.deleteTask(id),
     onSuccess: () => {
+      const taskTitle = this.task()?.title ?? 'Task';
       this.queryClient.invalidateQueries({ queryKey: ['tasks'] });
       this.closeDialog();
+      toast.success('Task deleted successfully', {
+        description: `"${taskTitle}" has been removed`,
+      });
       this.success.emit();
     },
   }));

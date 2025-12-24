@@ -14,6 +14,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { injectMutation, QueryClient } from '@tanstack/angular-query-experimental';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideX } from '@ng-icons/lucide';
+import { toast } from 'ngx-sonner';
 import { BrnDialogImports } from '@spartan-ng/brain/dialog';
 import { BrnSelectImports } from '@spartan-ng/brain/select';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
@@ -206,10 +207,21 @@ export class CreateTaskDialogComponent {
         dueDate: data.dueDate,
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       this.queryClient.invalidateQueries({ queryKey: ['tasks'] });
       this.resetForm();
       this.closeDialog();
+
+      if (variables.id) {
+        toast.success('Task updated successfully', {
+          description: `"${variables.title}" has been updated`,
+        });
+      } else {
+        toast.success('Task created successfully', {
+          description: `"${variables.title}" has been added to your tasks`,
+        });
+      }
+
       this.success.emit();
     },
   }));
