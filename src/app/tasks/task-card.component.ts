@@ -91,7 +91,7 @@ import { TasksService } from './tasks.service';
           }
           <button hlmDropdownMenuItem (click)="onEditTask()">Edit</button>
           <hlm-dropdown-menu-separator />
-          <button hlmDropdownMenuItem variant="destructive">Delete</button>
+          <button hlmDropdownMenuItem variant="destructive" (click)="onDeleteTask()">Delete</button>
         </hlm-dropdown-menu-group>
       </hlm-dropdown-menu>
     </ng-template>
@@ -104,6 +104,7 @@ export class TaskCardComponent {
 
   readonly task = input.required<Task>();
   readonly editTask = output<Task>();
+  readonly deleteTask = output<Task>();
 
   readonly toggleCompletionMutation = injectMutation(() => ({
     mutationFn: (isCompleted: boolean) =>
@@ -147,6 +148,10 @@ export class TaskCardComponent {
 
   onEditTask() {
     this.editTask.emit(this.task());
+  }
+
+  onDeleteTask() {
+    this.deleteTask.emit(this.task());
   }
 
   formatDueDateDisplay(task: Task): string {
