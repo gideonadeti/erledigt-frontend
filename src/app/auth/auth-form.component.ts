@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmFormFieldImports } from '@spartan-ng/helm/form-field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideEye, lucideEyeOff } from '@ng-icons/lucide';
@@ -22,6 +23,7 @@ type SubmitFn = (payload: { email: string; password: string }) => any;
   imports: [
     ReactiveFormsModule,
     HlmFieldImports,
+    HlmFormFieldImports,
     HlmInputImports,
     SubmitButtonComponent,
     NgIcon,
@@ -32,16 +34,14 @@ type SubmitFn = (payload: { email: string; password: string }) => any;
     <form class="space-y-6" [formGroup]="form" (ngSubmit)="onSubmit()">
       <fieldset hlmFieldSet>
         <div hlmFieldGroup>
-          <div hlmField [attr.data-invalid]="emailInvalid() ? true : null">
-            <label hlmFieldLabel>Email</label>
+          <hlm-form-field>
+            <label hlmLabel>Email</label>
             <input hlmInput type="email" formControlName="email" autocomplete="email" required />
-            @if (emailInvalid()) {
-            <hlm-field-error>Enter a valid email.</hlm-field-error>
-            }
-          </div>
+            <hlm-error>Enter a valid email.</hlm-error>
+          </hlm-form-field>
 
-          <div hlmField [attr.data-invalid]="passwordInvalid() ? true : null">
-            <label hlmFieldLabel>Password</label>
+          <hlm-form-field>
+            <label hlmLabel>Password</label>
             <div class="relative">
               <input
                 hlmInput
@@ -62,16 +62,14 @@ type SubmitFn = (payload: { email: string; password: string }) => any;
                 }
               </button>
             </div>
-            @if (passwordInvalid()) {
-            <hlm-field-error>
+            <hlm-error>
               <ul class="list-disc list-inside space-y-1">
                 @for (msg of passwordHelperMessages(); track msg) {
                 <li>{{ msg }}</li>
                 }
               </ul>
-            </hlm-field-error>
-            }
-          </div>
+            </hlm-error>
+          </hlm-form-field>
         </div>
       </fieldset>
 
