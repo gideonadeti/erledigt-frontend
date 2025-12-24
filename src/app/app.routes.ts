@@ -4,6 +4,10 @@ import { authRedirectGuard } from './auth/auth-redirect.guard';
 
 export const routes: Routes = [
   {
+    path: '',
+    loadComponent: () => import('./home/home.component').then((c) => c.HomeComponent),
+  },
+  {
     path: 'tasks',
     loadComponent: () => import('./tasks/tasks.component').then((c) => c.TasksComponent),
   },
