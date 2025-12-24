@@ -57,4 +57,12 @@ export class TasksService {
       })
     );
   }
+
+  deleteTask(id: number) {
+    return firstValueFrom(
+      this.http.delete(`${API_BASE}/api/TodoTasks/${id}`, {
+        withCredentials: true,
+      })
+    );
+  }
 }
