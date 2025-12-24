@@ -12,7 +12,12 @@ import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
       <button hlmBtn variant="outline" (click)="handleCancel()()" [disabled]="isPending()">
         Cancel
       </button>
-      <button hlmBtn (click)="handleSubmit()()" [disabled]="disabled() || isPending()">
+      <button
+        hlmBtn
+        [variant]="submitVariant()"
+        (click)="handleSubmit()()"
+        [disabled]="disabled() || isPending()"
+      >
         @if (isPending()) {
         <hlm-spinner />
         {{ pendingText() }}
@@ -28,6 +33,9 @@ export class DialogFooterComponent {
   readonly disabled = input(false);
   readonly text = input('');
   readonly pendingText = input('');
+  readonly submitVariant = input<
+    'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+  >('default');
   readonly handleCancel = input(() => {});
   readonly handleSubmit = input(() => {});
 }
