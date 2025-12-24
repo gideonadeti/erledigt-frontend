@@ -25,4 +25,8 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/sign-up.component').then((c) => c.SignUpComponent),
     canMatch: [authRedirectGuard],
   },
+  {
+    path: '**',
+    loadComponent: () => import('./not-found/not-found.component').then((c) => c.NotFoundComponent),
+  },
 ];
