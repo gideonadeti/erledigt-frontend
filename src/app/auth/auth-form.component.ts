@@ -8,6 +8,9 @@ import {
 } from '@angular/forms';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideEye, lucideEyeOff } from '@ng-icons/lucide';
+import { HlmIcon } from '@spartan-ng/helm/icon';
 
 import { SubmitButtonComponent } from './submit-button.component';
 
@@ -16,7 +19,15 @@ type SubmitFn = (payload: { email: string; password: string }) => any;
 @Component({
   selector: 'app-auth-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, HlmFieldImports, HlmInputImports, SubmitButtonComponent],
+  imports: [
+    ReactiveFormsModule,
+    HlmFieldImports,
+    HlmInputImports,
+    SubmitButtonComponent,
+    NgIcon,
+    HlmIcon,
+  ],
+  providers: [provideIcons({ lucideEye, lucideEyeOff })],
   template: `
     <form class="space-y-6" [formGroup]="form" (ngSubmit)="onSubmit()">
       <fieldset hlmFieldSet>
@@ -31,13 +42,26 @@ type SubmitFn = (payload: { email: string; password: string }) => any;
 
           <div hlmField [attr.data-invalid]="passwordInvalid() ? true : null">
             <label hlmFieldLabel>Password</label>
-            <input
-              hlmInput
-              type="password"
-              formControlName="password"
-              [attr.autocomplete]="passwordAutocomplete()"
-              required
-            />
+            <div class="relative">
+              <input
+                hlmInput
+                [type]="showPassword() ? 'text' : 'password'"
+                formControlName="password"
+                [attr.autocomplete]="passwordAutocomplete()"
+                required
+              />
+              <button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                @if (showPassword()) {
+                <ng-icon hlm name="lucideEyeOff" size="sm" />
+                } @else {
+                <ng-icon hlm name="lucideEye" size="sm" />
+                }
+              </button>
+            </div>
             @if (passwordInvalid()) {
             <hlm-field-error>
               <ul class="list-disc list-inside space-y-1">
@@ -87,6 +111,7 @@ export class AuthFormComponent {
   protected readonly submitting = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly fieldErrors = signal<string[]>([]);
+  protected readonly showPassword = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -107,6 +132,10 @@ export class AuthFormComponent {
     const control = this.form.controls.password;
     const errors = control.errors as ValidationErrors | null;
     return this.passwordHelper()(errors);
+  }
+
+  protected togglePasswordVisibility(): void {
+    this.showPassword.update((value) => !value);
   }
 
   protected onSubmit() {
