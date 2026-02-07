@@ -1,6 +1,6 @@
 # Erledigt Frontend
 
-Frontend application for Erledigt, a modern todo application built with Angular, .NET, and SQL Server. This responsive web application provides an intuitive interface for managing tasks with a beautiful UI and seamless user experience.
+Frontend application for Erledigt, a modern todo application built with Angular, .NET, and SQL Server. This responsive web application provides an intuitive interface for managing tasks with a beautiful UI and seamless user experience and connects to the [Erledigt Backend](https://github.com/gideonadeti/erledigt-backend) .NET API.
 
 ## Table of Contents
 
